@@ -1,0 +1,69 @@
+<div class="container">
+  <div class="col-md-4">
+    <div class="form-area"> 
+      <%= form_with(model: @coordinate) do |form| %>
+        <% if @coordinate.errors.any? %>
+          <div id="error_explanation">
+            <h2><%= pluralize(@coordinate.errors.count, "error") %> prohibited this form from being submitted:</h2>
+
+            <ul>
+            <% @coordinate.errors.full_messages.each do |message| %>
+              <li><%= message %></li>
+            <% end %>
+            </ul>
+          </div>
+        <% end %>
+
+        <div class="field form-group">
+          <%= form.label :Address%>
+          <%= form.text_field :address, class: "form-control", id: "address" %>
+        </div>
+
+        <div class="form-group">
+           <input type="submit" value="Submit" name="commit" class = "savebutton btn btn-default btn-primary"/>
+        </div>
+
+        <div class="row" id="coordinates">
+
+        </div>
+
+        <script>
+            $(".savebutton").click(function() {
+              //$('#coordinates').html(''); 
+              if($('#address').val() == ''){
+                alert('Address can not be left blank. Please fill address and resubmit');
+                window.location.href = ""
+              }
+              else
+              {
+                $('form').submit(function() {  
+                    var valuesToSubmit = $(this).serialize();
+                    $.ajax({
+                        type: 'POST',
+                        url: $(this).attr('action'), //submits it to the given url of the form
+                        data: valuesToSubmit,
+                        dataType: "JSON", // you want a difference between normal and ajax-calls, and json is standard
+                        success: function(data){
+                          if(data.success == "true"){
+                            $('#coordinates').html(''); 
+                            $("#coordinates").append("<h4>Latitude : " + data.coordinates.latitute + "</h4>");
+                            $("#coordinates").append("<h4>Longitude : " + data.coordinates.longitude + "</h4>");
+                          }
+                          else //render response from google map api
+                          { 
+                            $('#coordinates').html(''); 
+                            $("#coordinates").append("<h4>Latitude : " + data.coordinates.results[0].geometry.location.lat + "</h4>");
+                            $("#coordinates").append("<h4>Longitude : " + data.coordinates.results[0].geometry.location.lng + "</h4>");
+                          }
+                        }
+                    });
+                    return false; // prevents normal behaviour
+                  });
+              }
+            });
+        </script>
+
+      <% end %>
+    </div>
+  </div>
+</div>
